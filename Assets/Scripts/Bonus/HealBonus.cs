@@ -9,6 +9,9 @@ public class HealBonus : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.TryGetComponent<Player>(out Player player))
+        {
             player.AddHealth(_health);
+            gameObject.SetActive(false);
+        }
     }
 }

@@ -5,10 +5,11 @@ using UnityEngine;
 public class Spawner : ObjectPool
 {
     [SerializeField] private GameObject[] _enemyPrefab;
-    [SerializeField] private HealBonus _bonusPrefab;
+    [SerializeField] private GameObject _bonusPrefab;
     [SerializeField] private float _timeToNextSpawn;
     [SerializeField] private float _timeToNextBonus;
     [SerializeField] private Transform _spawner;
+    [SerializeField] private int _capacity;
 
     private Transform[] _points;
 
@@ -17,7 +18,8 @@ public class Spawner : ObjectPool
 
     private void Start()
     {
-        Initialization(_enemyPrefab);
+        Initialization(_bonusPrefab, _capacity);
+        Initialization(_enemyPrefab, _capacity);
         _points = new Transform[_spawner.childCount];
 
         for (int i = 0; i < _points.Length; i++)
@@ -29,14 +31,28 @@ public class Spawner : ObjectPool
     private void Update()
     {
         _elapsedTime += Time.deltaTime;
+        _elapsedTimeToBonus += Time.deltaTime;
 
-        if (_elapsedTime >= _timeToNextSpawn)
+        if (_elapsedTimeToBonus < _timeToNextBonus)
         {
-            if (TryGetEnemy(out GameObject enemy))
+            if (_elapsedTime >= _timeToNextSpawn)
             {
+                if (TryGetEnemy(out GameObject enemy))
+                {
+                    _elapsedTime = 0f;
+                    var randomIndex = Random.Range(0, _points.Length);
+                    SetEnemy(enemy, _points[randomIndex]);
+                }
+            }
+        }
+        else
+        {
+            if (TryGetBonus(out GameObject bonus))
+            {
+                _elapsedTimeToBonus = 0f;
                 _elapsedTime = 0f;
                 var randomIndex = Random.Range(0, _points.Length);
-                SetEnemy(enemy, _points[randomIndex]);
+                SetEnemy(bonus, _points[randomIndex]);
             }
         }
     }

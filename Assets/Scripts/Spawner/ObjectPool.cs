@@ -6,13 +6,12 @@ using UnityEngine;
 public class ObjectPool : MonoBehaviour
 {
     [SerializeField] private GameObject _container;
-    [SerializeField] private int _capacity;
 
     private List<GameObject> _pool = new List<GameObject>();
 
-    protected void Initialization(GameObject[] prefab)
+    protected void Initialization(GameObject[] prefab, int capacity)
     {
-        for (int i = 0; i < _capacity; i++)
+        for (int i = 0; i < capacity; i++)
         {
             var index = Random.Range(0, prefab.Length);
             GameObject spawned = Instantiate(prefab[index], _container.transform);
@@ -21,11 +20,27 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    protected bool TryGetEnemy(out GameObject result)
+    protected void Initialization(GameObject prefab, int capacity)
     {
-        var filter = _pool.Where(p => p.activeSelf == false);
+        for (int i = 0; i < capacity; i++)
+        {
+            GameObject spawned = Instantiate(prefab, _container.transform);
+            spawned.SetActive(false);
+            _pool.Add(spawned);
+        }
+    }
+
+    protected bool TryGetEnemy(out GameObject enemy)
+    {
+        var filter = _pool.Where(p => p.activeSelf == false&&p.TryGetComponent(out Enemy enemy));
         var randomIndex = Random.Range(0, filter.Count());
-        result = filter.ElementAt(randomIndex);
-        return result != null;
+        enemy = filter.ElementAt(randomIndex);
+        return enemy != null;
+    }
+
+    protected bool TryGetBonus(out GameObject bonus)
+    {
+        bonus = _pool.First(p => p.activeSelf == false && p.TryGetComponent(out HealBonus healBonus));
+        return bonus != null;
     }
 }

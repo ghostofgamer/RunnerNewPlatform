@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public float CurrentHealth { get; private set; }
 
     public event UnityAction<float> HealthChanged;
+    public event UnityAction Dying;
 
     private void Awake()
     {
@@ -36,5 +37,6 @@ public class Player : MonoBehaviour
     private void Die()
     {
         GetComponent<PlayerAnimations>().DeadAnimation(true);
+        Dying?.Invoke();
     }
 }
